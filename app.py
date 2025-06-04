@@ -12,7 +12,7 @@ col_logo, col_title = st.columns([1, 5])
 with col_logo:
     st.image("images/logo boston.png", width=120)
 with col_title:
-    st.title("Boston Scientific LatAm – Dashboard de Canal Indireto")
+    st.title("Boston Scientific LatAm - Dashboard de Canal Indireto")
 
 # --- SIDEBAR ---
 st.sidebar.header("Filtros")
