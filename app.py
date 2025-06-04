@@ -2,46 +2,64 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
 
-BS_COLORS = ["#003c71", "#EBF7F9", "#35d2f5", "#feb334", "#77b900", "#008ECC", "#633D7A", "#00AE67"]
+# --- CONFIG ---
+st.set_page_config(layout="wide", page_title="Dashboard Canal Indireto | Boston Scientific")
 
-st.set_page_config(layout="wide")
-st.title("DASHBOARD DE VENDAS – Boston Scientific")
+# --- LOGO ---
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    st.image("images/logo boston.png", width=120)
+with col_title:
+    st.title("Boston Scientific LatAm – Dashboard de Canal Indireto")
 
+# --- SIDEBAR ---
 st.sidebar.header("Filtros")
-ano = st.sidebar.selectbox("Ano", [2022, 2023, 2024])
-mes = st.sidebar.selectbox("Mês", ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"])
-tipo_venda = st.sidebar.radio("Tipo da Venda", ["Venda Direta", "Canal Indireto"])
+pais = st.sidebar.multiselect("País:", options=["Brasil", "Argentina", "México"], default="Brasil")
+bu = st.sidebar.multiselect("Unidade de Negócio:", [
+    "Cardiologia Intervencionista", "Neuromodulação",
+    "Urologia", "Gastroenterologia", "Pulmonar", "Oncologia"
+])
+tier = st.sidebar.selectbox("Tier:", ["Silver", "Gold", "Platinum"])
+vendas_min = st.sidebar.slider("Valor Mínimo de Vendas (USD):", 0, 10000000, 2500000)
+st.sidebar.button("Aplicar Filtros")
 
-@st.cache_data
-def carregar_dados():
-    return pd.DataFrame({
-        "Mês": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
-        "Faturamento": [87000, 92000, 98000, 103000, 101000, 95000, 99000, 100000, 97000, 96000, 93000, 94000],
-        "Tipo": ["Canal" if i%2==0 else "Direto" for i in range(12)]
-    })
+# --- IMAGEM POR BU ---
+bu_images = {
+    "Cardiologia Intervencionista": "images/SYNERGY BP DES Hero.png",
+    "Neuromodulação": "images/Illumina 3D™ portfolio.png",
+    "Urologia": "images/GreenLight XPS™ Laser Therapy System.jpg",
+    "Gastroenterologia": "images/SpyGlass DS Direct Visualization System.jpg",
+    "Pulmonar": "images/TS atomsphere nobg.png",
+    "Oncologia": "images/Mantis_new_angle_CU.png",
+}
 
-df = carregar_dados()
+if bu:
+    for unidade in bu:
+        if unidade in bu_images:
+            st.image(bu_images[unidade], use_column_width=True)
 
-st.subheader("Faturamento Mensal")
-fig1 = px.bar(df, x="Mês", y="Faturamento", color="Tipo", color_discrete_sequence=BS_COLORS)
-st.plotly_chart(fig1, use_container_width=True)
+# --- METRICAS (mock) ---
+st.markdown("""
+<div style='display: flex; justify-content: space-around;'>
+    <div style='background-color:#003c71; padding:20px; border-radius:10px; color:white;'>
+        <h4>Total de Parceiros</h4><h2>48</h2></div>
+    <div style='background-color:#003c71; padding:20px; border-radius:10px; color:white;'>
+        <h4>Vendas Totais</h4><h2>$3.450.000</h2></div>
+    <div style='background-color:#003c71; padding:20px; border-radius:10px; color:white;'>
+        <h4>Média BSC Score</h4><h2>84%</h2></div>
+</div>
+""", unsafe_allow_html=True)
 
-st.subheader("Faturamento por Produto")
-df_prod = pd.DataFrame({
-    "Produto": ["Produto A", "Produto B", "Produto C"],
-    "Vendas": [150000, 120000, 95000]
+# --- GRÁFICO MOCK ---
+df_mock = pd.DataFrame({
+    "País": ["Brasil", "Argentina", "México"],
+    "Parceiros": [21, 15, 12]
 })
-fig2 = px.bar(df_prod, x="Vendas", y="Produto", orientation='h', color="Produto", color_discrete_sequence=BS_COLORS)
-st.plotly_chart(fig2, use_container_width=True)
-
-st.subheader("Distribuição por Forma de Pagamento")
-df_pgmt = pd.DataFrame({
-    "Forma": ["Boleto", "Cartão de Crédito", "PIX"],
-    "Valor": [70000, 95000, 50000]
-})
-fig3 = px.pie(df_pgmt, names="Forma", values="Valor", color_discrete_sequence=BS_COLORS)
-st.plotly_chart(fig3, use_container_width=True)
+fig = px.bar(df_mock, x="País", y="Parceiros", title="Distribuição de Parceiros por País",
+             color_discrete_sequence=["#003c71"])
+st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")
-st.caption("Boston Scientific - Dashboard de Vendas | Versão de demonstração")
+st.caption("Dashboard de uso exclusivo para gestão do canal indireto na América Latina.")
